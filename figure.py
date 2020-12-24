@@ -72,6 +72,9 @@ class figure(ABC):
     def move(self, side_X: int, side_Y: int):
         for _cell in self.__cells:
             _cell.move(side_X, side_Y)
+            
+    def get_cells(self) -> List[cell]:
+        return self.__cells
 
     def get_state_number(self) -> int:
         return self.__state
