@@ -1,5 +1,3 @@
-from enum import Enum
-
 
 class coords:
     x: int
@@ -10,7 +8,7 @@ class coords:
         self.y = y
 
 
-class moving_side(Enum):
+class moving_side:
     STAY = coords(0, 0)
     RIGHT = coords(1, 0)
     LEFT = coords(-1, 0)

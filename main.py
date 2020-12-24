@@ -1,4 +1,3 @@
-import window
+from controller import controller
 
-window.show_menu()
-window.initialize_window()
+controller.initialize_window()
