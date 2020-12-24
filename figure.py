@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Tuple, List
+from additional.movement import coords, moving_side
 
 
 class cell:
     __number: int
-    __x: int
-    __y: int
+    __coords: coords
     __created: bool = False
 
     def set_number(self, number: int):
@@ -20,11 +20,18 @@ class cell:
         self.__x += move_X
         self.__y += move_Y
 
+    def move(self, move: coords):
+        self.__x += move.x
+        self.__y += move.y
+
+    def get_coords(self) -> coords:
+        return self.__coords
+
     def get_x(self) -> int:
-        return self.__x
+        return self.__coords.x
 
     def get_y(self) -> int:
-        return self.__y
+        return self.__coords.y
 
 
 class figure(ABC):
@@ -35,7 +42,6 @@ class figure(ABC):
     __cells: List[cell] = []
     __main_cell: cell
     __state: int = 0
-    __is_falled: bool = False
 
     def __init__(self) -> None:
         for row in range(len(self.__cell_coords[self.__state])):
@@ -46,7 +52,7 @@ class figure(ABC):
                     else:
                         self.__cells.append(cell(column, row))
 
-    def rotate(self, state: int):
+    def rotate(self, state: int) -> None:
         cell_parse_index = 0
         for row in range(len(self.__cell_coords[self.__state])):
             for column in range(len(self.__cell_coords[self.__state][row])):
@@ -57,22 +63,22 @@ class figure(ABC):
                             self.__main_cell.get_y() + row - self.__main_cell_y)
                         cell_parse_index += 1
 
-    def change_state_rotation(self):
+    def change_state_rotation(self) -> None:
         self.__state = (self.__state + 1) // len(self.__cell_coords)
 
-    def move_left(self):
-        self.move(-1, 0)
+    def move_left(self) -> None:
+        self.move(moving_side.LEFT)
 
-    def move_right(self):
-        self.move(1, 0)
+    def move_right(self) -> None:
+        self.move(moving_side.RIGHT)
 
-    def fall(self):
-        self.move(0, 1)
+    def fall(self) -> None:
+        self.move(moving_side.DOWN)
 
-    def move(self, side_X: int, side_Y: int):
+    def move(self, side: coords) -> None:
         for _cell in self.__cells:
-            _cell.move(side_X, side_Y)
-            
+            _cell.move(side)
+
     def get_cells(self) -> List[cell]:
         return self.__cells
 
