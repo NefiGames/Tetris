@@ -8,7 +8,7 @@ class cell:
     __y: int
     __created: bool = False
 
-    def set_number(self, number: int):
+    def set_number(self, number: int):  # not ha
         if not self.__created:
             __number = number
 
@@ -72,7 +72,7 @@ class figure(ABC):
     def move(self, side_X: int, side_Y: int):
         for _cell in self.__cells:
             _cell.move(side_X, side_Y)
-            
+
     def get_cells(self) -> List[cell]:
         return self.__cells
 
