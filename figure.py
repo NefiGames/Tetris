@@ -30,6 +30,10 @@ class cell:
         self.__coords.x += move.x
         self.__coords.y += move.y
 
+    def move_to(self, move_X: int, move_Y: int):
+        self.__coords.x = move_X
+        self.__coords.y = move_Y
+
     def get_coords(self) -> coords:
         return self.__coords
 
@@ -57,8 +61,8 @@ class figure(ABC):
     # this is an auxiliary variable, needed to move all cells by "rotate" method
     __cell_parse_index: int
 
-    def rotate(self, state: int) -> None:
-        self.__state = (self.__state + 1) // len(self.__cell_coords)
+    def rotate(self) -> None:
+        self.__state = (self.__state + 1) % len(self.__cell_coords)
         self.__cell_parse_index = 0
         self.__do_with_cell_coords(self.__move_cells_for_rotate)
 
@@ -69,12 +73,18 @@ class figure(ABC):
         for _cell in self.get_cells_with_main():
             _cell.move(side)
 
+    def get_main_cell(self) -> cell:
+        return self.__main_cell
+
     def get_cells(self) -> List[cell]:
         return self.__cells
 
     def get_cells_with_main(self) -> List[cell]:
         all_cells = list(self.__cells)
-        all_cells.append(self.__main_cell)
+        try:
+            all_cells.append(self.__main_cell)
+        except AttributeError:
+            pass
         return all_cells
 
     def get_color(self) -> str:
@@ -84,7 +94,10 @@ class figure(ABC):
         return self.__state
 
     def get_state(self, number: int):
-        return self.__cell_coords[number]
+        return self.__cell_coords[number % len(self.__cell_coords)]
+
+    def get_current_state(self):
+        return self.__cell_coords[self.__state]
 
     def __do_with_cell_coords(self, function):
         for row in range(len(self.__cell_coords[self.__state])):
@@ -94,17 +107,26 @@ class figure(ABC):
 
     def __create_cells(self, row: int, column: int) -> None:
         if row == self.__main_cell_y and column == self.__main_cell_x:
-            self.__main_cell = cell(column, row)
+            self.__main_cell = cell(column + 2, row)
         else:
-            self.__cells.append(cell(column, row))
+            self.__cells.append(cell(column + 2, row))
 
     def __move_cells_for_rotate(self, row: int, column: int):
-        if self.__cell_coords[row][column] == 1:
-            if not (row == self.__main_cell_y and column == self.__main_cell_x):
-                self.__cells[self.__cell_parse_index].move(
-                    self.__main_cell.get_x() + column - self.__main_cell_x,
-                    self.__main_cell.get_y() + row - self.__main_cell_y)
-                self.__cell_parse_index += 1
+        if not (row == self.__main_cell_y and column == self.__main_cell_x):
+            self.__cells[self.__cell_parse_index].move_to(self.__main_cell.get_x() + column - self.__main_cell_x,
+                                                          self.__main_cell.get_y() + row - self.__main_cell_y)
+            self.__cell_parse_index += 1
 
     def cell_coords(self):
         return self.__cell_coords
+
+    def delete_cell(self, cell_to_delete: cell):
+        try:
+            if self.__main_cell.get_number() == cell_to_delete.get_number():
+                del self.__main_cell
+        except AttributeError:
+            pass
+        for c in range(len(self.__cells)):
+            if self.__cells[c].get_number() == cell_to_delete.get_number():
+                del self.__cells[c]
+                return

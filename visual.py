@@ -1,6 +1,7 @@
 from tkinter import *
 from additional.movement import coords
 import controller
+from additional.colors import colors
 
 
 class menu:
@@ -55,6 +56,9 @@ class game:
     __rectangle_border_y: int = 0
     __ITEM_SIZE: int = 0
     __canvas: Canvas
+    __color_line: str = colors.line
+    __color_grid: str = colors.grid
+    __color_bg: str = colors.bg
 
     def canvas(self) -> Canvas:
         return self.__canvas
@@ -76,22 +80,25 @@ class game:
         self.draw_grid()
 
     def create_canvas(self):
-        self.__canvas = Canvas(width=visual.window().WIDTH(), height=visual.window().HEIGHT(), bg='black')
+        self.__canvas = Canvas(width=visual.window().WIDTH(), height=visual.window().HEIGHT(), bg=self.__color_bg)
         self.__canvas.pack()
         self.__canvas.focus_set()
 
     def draw_grid(self):
-        self.canvas().create_rectangle(self.rectangle_border_x(), self.rectangle_border_y(),
-                                       visual.window().WIDTH() - self.rectangle_border_x(),
-                                       visual.window().HEIGHT() - self.rectangle_border_y(), fill='gray')
+        point1 = self.grid_to_pixels_point(0, 0)
+        point2 = self.grid_to_pixels_point(10, 20)
+        self.canvas().create_rectangle(point1.x, point1.y,
+                                       point2.x, point2.y, fill=self.__color_grid)
         for i in range(11):
-            self.canvas().create_line(self.rectangle_border_x() + self.ITEM_SIZE() * i, self.rectangle_border_y(),
-                                      self.rectangle_border_x() + self.ITEM_SIZE() * i,
-                                      visual.window().HEIGHT() - self.rectangle_border_y())
+            point1 = self.grid_to_pixels_point(i, 0)
+            point2 = self.grid_to_pixels_point(i, 20)
+            self.canvas().create_line(point1.x, point1.y,
+                                      point2.x, point2.y, fill=self.__color_line)
         for i in range(21):
-            self.canvas().create_line(self.rectangle_border_x(), self.rectangle_border_y() + self.ITEM_SIZE() * i,
-                                      visual.window().WIDTH() - self.rectangle_border_x(),
-                                      self.rectangle_border_y() + self.ITEM_SIZE() * i)
+            point1 = self.grid_to_pixels_point(0, i)
+            point2 = self.grid_to_pixels_point(10, i)
+            self.canvas().create_line(point1.x, point1.y,
+                                      point2.x,point2.y, fill=self.__color_line)
 
     def refresh_figures(self):
         for _figure in controller.controller.grid().get_figures_with_falling():
@@ -102,7 +109,9 @@ class game:
                     points = self.grid_to_pixels_cell(cell.get_x(), cell.get_y())
                     cell.set_number(
                         self.canvas().create_rectangle(points[0].x, points[0].y, points[1].x,
-                                                       points[1].y, fill=_figure.get_color()))
+                                                       points[1].y, fill=_figure.get_color(), outline=colors.line))
+        for cell in controller.grid().get_deleted_cells():
+            self.__canvas.delete(cell)
         self.__canvas.focus_set()
 
     def synchronize_cell(self, cell):

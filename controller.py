@@ -2,12 +2,16 @@ from grid import grid
 from visual import visual
 from level import results
 from additional.movement import moving_side, coords
+import keyboard
 
 
 class controller:
     __grid: grid
     __results: results
-    delay = 500
+    __normal_fall_delay = 500
+    __speed_fall_delay = 50
+    __delay_falling = __normal_fall_delay
+    delay_moving = 70
 
     def __init__(self):
         assert "Controller can not be created. It is a static class"
@@ -33,22 +37,35 @@ class controller:
     def initialize_game():
         visual.game().initialize()
         controller.__grid = grid()
-        controller.bind_keys()
+        visual.window().root().bind('<Up>', lambda event: controller.rotate_figure())
+        controller.check_keys()
         controller.fall_figure()
 
     @staticmethod
-    def bind_keys():
-        visual.game().canvas().bind('<Left>', lambda event: controller.left_right_move(moving_side.LEFT))
-        visual.game().canvas().bind('<Right>', lambda event: controller.left_right_move(moving_side.RIGHT))
-        visual.game().canvas().focus_set()
+    def check_keys():
+        delay: int = controller.delay_moving
+        if keyboard.is_pressed('Left'):
+            controller.move(moving_side.LEFT)
+        if keyboard.is_pressed('Right'):
+            controller.move(moving_side.RIGHT)
+        if keyboard.is_pressed('Down'):
+            controller.move(moving_side.DOWN)
+            delay = controller.__speed_fall_delay
+
+        visual.window().root().after(delay, lambda: controller.check_keys())
+
+    @staticmethod
+    def rotate_figure():
+        controller.grid().try_figure_rotate()
+        visual.game().refresh_figures()
 
     @staticmethod
     def fall_figure():
         controller.grid().try_figure_fall()
         visual.game().refresh_figures()
-        visual.window().root().after(controller.delay, lambda: controller.fall_figure())
+        visual.window().root().after(controller.__delay_falling, lambda: controller.fall_figure())
 
     @staticmethod
-    def left_right_move(side: coords):
+    def move(side: coords):
         controller.grid().try_move_figure(side)
         visual.game().refresh_figures()

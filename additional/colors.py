@@ -1,0 +1,11 @@
+class colors:
+    line = '#171717'
+    grid = '#282828'
+    bg = 'gray'
+    figure_T = '#ebd500'
+    figure_J = '#1465a6'
+    figure_Z = '#da8400'
+    figure_O = '#cc0b10'
+    figure_S = '#884086'
+    figure_L = '#359930'
+    figure_I = '#59b0bd'
