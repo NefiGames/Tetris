@@ -127,6 +127,9 @@ class game:
                      self.rectangle_border_y() + self.ITEM_SIZE() * y)
         return vec
 
+    def remove_game(self):
+        self.__canvas.destroy()
+
 
 class visual:
     __menu: menu = menu()

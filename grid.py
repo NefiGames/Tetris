@@ -20,7 +20,10 @@ class grid:
 
     def new_random_figure(self) -> figure:
         self.__falling_figure = get_random_figure()()
-        return self.__falling_figure
+        for c in self.__falling_figure.get_cells_with_main():
+            if not self.is_cell_free(c.get_x(), c.get_y()):
+                return False
+        return True
 
     def delete_line(self, y: int) -> None:
         for _figure in self.__figures:
@@ -61,13 +64,15 @@ class grid:
         self.__falling_figure.move(side)
         return True
 
-    def try_figure_fall(self):
+    def try_figure_fall(self) -> bool:
         if not self.is_figure_falled():
             self.__falling_figure.fall()
         else:
             self.__figures.append(self.__falling_figure)
             self.check_lines_to_delete()
-            self.new_random_figure()
+            if not self.new_random_figure():
+                return False
+        return True
 
     def check_lines_to_delete(self):
         lines = [0] * self.__height

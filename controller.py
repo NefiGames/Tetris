@@ -43,16 +43,19 @@ class controller:
 
     @staticmethod
     def check_keys():
-        delay: int = controller.delay_moving
-        if keyboard.is_pressed('Left'):
-            controller.move(moving_side.LEFT)
-        if keyboard.is_pressed('Right'):
-            controller.move(moving_side.RIGHT)
-        if keyboard.is_pressed('Down'):
-            controller.move(moving_side.DOWN)
-            delay = controller.__speed_fall_delay
+        try:
+            delay: int = controller.delay_moving
+            if keyboard.is_pressed('Left'):
+                controller.move(moving_side.LEFT)
+            if keyboard.is_pressed('Right'):
+                controller.move(moving_side.RIGHT)
+            if keyboard.is_pressed('Down'):
+                controller.move(moving_side.DOWN)
+                delay = controller.__speed_fall_delay
 
-        visual.window().root().after(delay, lambda: controller.check_keys())
+            visual.window().root().after(delay, lambda: controller.check_keys())
+        except Exception:
+            return
 
     @staticmethod
     def rotate_figure():
@@ -61,9 +64,17 @@ class controller:
 
     @staticmethod
     def fall_figure():
-        controller.grid().try_figure_fall()
+        if not controller.grid().try_figure_fall():
+            controller.loose_game()
+            return
         visual.game().refresh_figures()
         visual.window().root().after(controller.__delay_falling, lambda: controller.fall_figure())
+
+    @staticmethod
+    def loose_game():  # TODO
+        visual.game().remove_game()
+        controller.__initialize_menu()
+        controller.__grid = grid()
 
     @staticmethod
     def move(side: coords):
