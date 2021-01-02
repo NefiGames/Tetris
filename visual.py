@@ -124,14 +124,17 @@ class game:
         for cell in self.__mirage:
             self.__canvas.delete(cell)
         self.__mirage = []
-        y = 20
+        y = 0
         cells = controller.controller.grid().falling_figure().get_cells_with_main()
         i = 0
-        while i < len(cells):
-            while not controller.controller.grid().is_cell_free(cells[i].get_x(), y + cells[i].get_y()):
-                y -= 1
+        while controller.controller.grid().is_cell_free(cells[i].get_x(), y + 1 + cells[i].get_y()):
+            if len(cells) - i == 1:
+                y += 1
                 i = 0
-            i += 1
+            elif i < len(cells):
+                i += 1
+
+
         for cell in cells:
             points = self.grid_to_pixels_cell(cell.get_x(), cell.get_y() + y)
             self.__mirage.append(self.__canvas.create_rectangle(points[0].x, points[0].y, points[1].x,
