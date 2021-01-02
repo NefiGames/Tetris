@@ -54,9 +54,13 @@ class figure(ABC):
     __main_cell: cell
     __state: int = 0
 
-    def __init__(self) -> None:
+    def __init__(self, color=None, cells=None) -> None:
         self.__cells = []
-        self.__do_with_cell_coords(self.__create_cells)
+        if color is not None and cells is not None:
+            self.__color = color
+            self.__cells = cells
+        else:
+            self.__do_with_cell_coords(self.__create_cells)
 
     # this is an auxiliary variable, needed to move all cells by "rotate" method
     __cell_parse_index: int
@@ -65,6 +69,9 @@ class figure(ABC):
         self.__state = (self.__state + 1) % len(self.__cell_coords)
         self.__cell_parse_index = 0
         self.__do_with_cell_coords(self.__move_cells_for_rotate)
+
+    def get(self):
+        return self
 
     def fall(self) -> None:
         self.move(moving_side.DOWN)

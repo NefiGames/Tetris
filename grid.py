@@ -11,6 +11,13 @@ class grid:
     __figures: List[figure] = []
     __falling_figure: figure
     __deleted_cells: List[int] = []
+    __mirage_figure: figure
+    __deleted_lines = 0
+
+    def deleted_lines_count(self) -> int:
+        deleted_lines = self.__deleted_lines
+        self.__deleted_lines = 0
+        return deleted_lines
 
     def __init__(self):
         self.new_random_figure()
@@ -69,19 +76,22 @@ class grid:
             self.__falling_figure.fall()
         else:
             self.__figures.append(self.__falling_figure)
-            self.check_lines_to_delete()
+            self.__deleted_lines = self.check_lines_to_delete()
             if not self.new_random_figure():
                 return False
         return True
 
-    def check_lines_to_delete(self):
+    def check_lines_to_delete(self) -> int:
+        result = 0
         lines = [0] * self.__height
         for _figure in self.__figures:
             for _cell in _figure.get_cells_with_main():
                 lines[_cell.get_y()] += 1
         for i in range(len(lines)):
             if lines[i] == self.__width:
+                result += 1
                 self.delete_line(i)
+        return result
 
     def try_figure_rotate(self):
         future_state_number = self.__falling_figure.get_state_number() + 1

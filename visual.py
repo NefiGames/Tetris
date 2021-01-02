@@ -59,6 +59,9 @@ class game:
     __color_line: str = colors.line
     __color_grid: str = colors.grid
     __color_bg: str = colors.bg
+    __mirage = []
+    __level_text: int
+    __score_text: int
 
     def canvas(self) -> Canvas:
         return self.__canvas
@@ -78,6 +81,12 @@ class game:
         self.__rectangle_border_y = (visual.window().HEIGHT() - 20 * self.__ITEM_SIZE) // 2
         self.create_canvas()
         self.draw_grid()
+        self.__score_text = self.__canvas.create_text(100, 50,
+                                                      text="SCORE 0",
+                                                      justify=LEFT, font="Verdana 14")
+        self.__level_text = self.__canvas.create_text(100, 80,
+                                                      text="LEVEL 1",
+                                                      justify=LEFT, font="Verdana 14")
 
     def create_canvas(self):
         self.__canvas = Canvas(width=visual.window().WIDTH(), height=visual.window().HEIGHT(), bg=self.__color_bg)
@@ -98,7 +107,7 @@ class game:
             point1 = self.grid_to_pixels_point(0, i)
             point2 = self.grid_to_pixels_point(10, i)
             self.canvas().create_line(point1.x, point1.y,
-                                      point2.x,point2.y, fill=self.__color_line)
+                                      point2.x, point2.y, fill=self.__color_line)
 
     def refresh_figures(self):
         for _figure in controller.controller.grid().get_figures_with_falling():
@@ -112,6 +121,23 @@ class game:
                                                        points[1].y, fill=_figure.get_color(), outline=colors.line))
         for cell in controller.grid().get_deleted_cells():
             self.__canvas.delete(cell)
+        for cell in self.__mirage:
+            self.__canvas.delete(cell)
+        self.__mirage = []
+        y = 20
+        cells = controller.controller.grid().falling_figure().get_cells_with_main()
+        i = 0
+        while i < len(cells):
+            while not controller.controller.grid().is_cell_free(cells[i].get_x(), y + cells[i].get_y()):
+                y -= 1
+                i = 0
+            i += 1
+        for cell in cells:
+            points = self.grid_to_pixels_cell(cell.get_x(), cell.get_y() + y)
+            self.__mirage.append(self.__canvas.create_rectangle(points[0].x, points[0].y, points[1].x,
+                                                                points[1].y, outline='white'))
+        self.__canvas.itemconfigure(self.__level_text, text='level ' + str(controller.controller.results().get_level()))
+        self.__canvas.itemconfigure(self.__score_text, text='score ' + str(controller.controller.results().get_score()))
         self.__canvas.focus_set()
 
     def synchronize_cell(self, cell):
@@ -126,6 +152,9 @@ class game:
         vec = coords(self.rectangle_border_x() + self.ITEM_SIZE() * x,
                      self.rectangle_border_y() + self.ITEM_SIZE() * y)
         return vec
+
+    def show_level(self):
+        pass
 
     def remove_game(self):
         self.__canvas.destroy()

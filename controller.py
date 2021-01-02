@@ -7,10 +7,8 @@ import keyboard
 
 class controller:
     __grid: grid
-    __results: results
-    __normal_fall_delay = 500
-    __speed_fall_delay = 50
-    __delay_falling = __normal_fall_delay
+    __results: results = results()
+    __delay_falling = 500
     delay_moving = 70
 
     def __init__(self):
@@ -19,6 +17,14 @@ class controller:
     @staticmethod
     def grid() -> grid:
         return controller.__grid
+
+    @staticmethod
+    def get_normal_fall_delay():
+        return int(500 // (1 + 0.2 * controller.__results.get_level()))
+
+    @staticmethod
+    def get_speed_fall_delay():
+        return controller.get_normal_fall_delay() // 10
 
     @staticmethod
     def results() -> results:
@@ -43,19 +49,16 @@ class controller:
 
     @staticmethod
     def check_keys():
-        try:
-            delay: int = controller.delay_moving
-            if keyboard.is_pressed('Left'):
-                controller.move(moving_side.LEFT)
-            if keyboard.is_pressed('Right'):
-                controller.move(moving_side.RIGHT)
-            if keyboard.is_pressed('Down'):
-                controller.move(moving_side.DOWN)
-                delay = controller.__speed_fall_delay
-
-            visual.window().root().after(delay, lambda: controller.check_keys())
-        except Exception:
-            return
+        delay: int = controller.delay_moving
+        if keyboard.is_pressed('Left'):
+            controller.move(moving_side.LEFT)
+        if keyboard.is_pressed('Right'):
+            controller.move(moving_side.RIGHT)
+        if keyboard.is_pressed('Down'):
+            controller.move(moving_side.DOWN)
+            controller.results().add_score_for_speed()
+            delay = controller.get_speed_fall_delay()
+        visual.window().root().after(delay, lambda: controller.check_keys())
 
     @staticmethod
     def rotate_figure():
@@ -64,9 +67,13 @@ class controller:
 
     @staticmethod
     def fall_figure():
+        controller.__delay_falling = controller.get_normal_fall_delay()
         if not controller.grid().try_figure_fall():
             controller.loose_game()
             return
+        deleted_lines = controller.grid().deleted_lines_count()
+        if deleted_lines > 0:
+            controller.results().add_score_for_lines(deleted_lines)
         visual.game().refresh_figures()
         visual.window().root().after(controller.__delay_falling, lambda: controller.fall_figure())
 
